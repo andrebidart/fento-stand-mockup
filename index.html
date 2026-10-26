@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fento Stand Renovation</title>
+<style>
+  :root { --bg:#14110f; --fg:#f1ebe2; --muted:#a59a8c; --accent:#2f8a68; --line:#2b2622; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding:20px 16px 8px; max-width:1500px; margin:0 auto; }
+  h1 { font-size:20px; letter-spacing:.08em; text-transform:uppercase; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0; }
+  .bar { display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:12px 16px; max-width:1500px; margin:0 auto; }
+  .group { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .group span { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-right:4px; }
+  button { background:transparent; color:var(--fg); border:1px solid var(--line); border-radius:999px; padding:7px 14px; font:inherit; cursor:pointer; }
+  button.on { background:var(--accent); border-color:var(--accent); }
+  .swatch { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .stage { position:relative; max-width:1500px; margin:0 auto 12px; user-select:none; touch-action:pan-y; overflow:hidden; }
+  .stage img { display:block; width:100%; height:auto; }
+  .stage .top { position:absolute; inset:0; clip-path:inset(0 0 0 50%); }
+  .handle { position:absolute; top:0; bottom:0; left:50%; width:2px; background:#fff; cursor:ew-resize; }
+  .handle::after { content:"◀ ▶"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#111; font-size:11px; padding:6px 8px; border-radius:999px; white-space:nowrap; }
+  .tag { position:absolute; top:10px; background:rgba(0,0,0,.6); padding:4px 10px; border-radius:6px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+  .tag.l { left:10px; } .tag.r { right:10px; }
+  footer { max-width:1500px; margin:0 auto; padding:4px 16px 28px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Fento · Foodhallen stand</h1>
+  <p class="sub">Drag the slider: left is the stand today, right is the new version. Boards are in order 1–6, left to right.</p>
+</header>
+
+<div class="bar">
+  <div class="group"><span>View</span>
+    <button data-view="" class="on">Full stand</button>
+    <button data-view="_zoom">Close-up boards + wall</button>
+  </div>
+  <div class="group"><span>Back wall</span>
+    <button data-wall="green" class="on"><i class="swatch" style="background:#1c6a4f"></i>Green tiles</button>
+    <button data-wall="darkgreen"><i class="swatch" style="background:#164f3e"></i>Dark green</button>
+    <button data-wall="white"><i class="swatch" style="background:#e8e4d8"></i>White</button>
+    <button data-wall="boards">Keep pink (boards only)</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <img id="base" src="before.jpg" alt="Stand today">
+  <img id="top" class="top" src="green.jpg" alt="Stand renovated">
+  <div class="handle" id="handle"></div>
+  <div class="tag l">Today</div><div class="tag r">New</div>
+</div>
+
+<footer>Draft mockup: tiles on the back wall only, about 10–13 cm. Side wall and pink counter cabinet stay as they are. Frosted acrylic plates, spaced as in the artwork files.</footer>
+
+<script>
+  const st = { view:'', wall:'green' };
+  const baseImg = document.getElementById('base'), topImg = document.getElementById('top');
+  function render(){ baseImg.src = 'before' + st.view + '.jpg'; topImg.src = st.wall + st.view + '.jpg'; }
+  document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => {
+    st.view = b.dataset.view; document.querySelectorAll('[data-view]').forEach(x => x.classList.toggle('on', x === b)); render(); });
+  document.querySelectorAll('[data-wall]').forEach(b => b.onclick = () => {
+    st.wall = b.dataset.wall; document.querySelectorAll('[data-wall]').forEach(x => x.classList.toggle('on', x === b)); render(); });
+  const stage = document.getElementById('stage'), handle = document.getElementById('handle');
+  function move(x){ const r = stage.getBoundingClientRect(); const p = Math.min(100, Math.max(0, (x - r.left) / r.width * 100));
+    topImg.style.clipPath = `inset(0 0 0 ${p}%)`; handle.style.left = p + '%'; }
+  let drag = false;
+  stage.addEventListener('pointerdown', e => { drag = true; move(e.clientX); stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener('pointermove', e => { if (drag) move(e.clientX); });
+  stage.addEventListener('pointerup', () => drag = false);
+</script>
+</body>
+</html>
